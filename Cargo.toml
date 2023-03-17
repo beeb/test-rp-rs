@@ -1,0 +1,81 @@
+[package]
+name = "test-rp-rs"
+version = "0.1.0"
+edition = "2021"
+
+[dependencies]
+atomic-polyfill = "1"
+cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
+cortex-m-rt = "0.7"
+cyw43 = { git = "https://github.com/embassy-rs/cyw43", branch = "master", features = [
+    "defmt",
+] }
+defmt = "0.3"
+defmt-rtt = "0.4"
+embassy-executor = { features = ["defmt", "nightly", "integrated-timers"] }
+embassy-net = { features = [
+    "defmt",
+    "tcp",
+    "dhcpv4",
+    "medium-ethernet",
+    "unstable-traits",
+    "nightly",
+] }
+embassy-rp = { features = [
+    "defmt",
+    "unstable-traits",
+    "nightly",
+    "unstable-pac",
+    "time-driver",
+] }
+embassy-time = { features = ["defmt", "defmt-timestamp-uptime"] }
+embedded-hal-1 = { package = "embedded-hal", version = "1.0.0-alpha.9" }
+embedded-hal-async = { version = "0.2.0-alpha.0" }
+embedded-io = { version = "0.4", features = ["async", "defmt"] }
+futures = { version = "0.3", default-features = false, features = [
+    "async-await",
+    "cfg-target-has-atomic",
+    "unstable",
+] }
+panic-probe = { version = "0.3", features = ["print-defmt"] }
+static_cell = "1"
+
+[patch.crates-io]
+embassy-executor = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
+embassy-time = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
+embassy-futures = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
+embassy-sync = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
+embassy-rp = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
+embassy-net = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
+embassy-net-driver = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
+embassy-net-driver-channel = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
+
+[profile.dev]
+debug = 2
+debug-assertions = true
+opt-level = 1
+overflow-checks = true
+
+[profile.release]
+codegen-units = 1
+debug = 1
+debug-assertions = false
+incremental = false
+lto = 'fat'
+opt-level = 'z'
+overflow-checks = false
+
+# do not optimize proc-macro crates = faster builds from scratch
+[profile.dev.build-override]
+codegen-units = 8
+debug = false
+debug-assertions = false
+opt-level = 0
+overflow-checks = false
+
+[profile.release.build-override]
+codegen-units = 8
+debug = false
+debug-assertions = false
+opt-level = 0
+overflow-checks = false
