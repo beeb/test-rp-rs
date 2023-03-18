@@ -94,7 +94,7 @@ async fn main(spawner: Spawner) {
     //});
 
     // Generate random seed
-    let seed = 0x0123_4567_89ab_cdef; // chosen by fair dice roll. guarenteed to be random.
+    let seed = 0xe109_eb3a_f41d_7e7b; // chosen by fair dice roll. guarenteed to be random.
 
     // Init network stack
     let stack = &*singleton!(Stack::new(
