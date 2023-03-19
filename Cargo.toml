@@ -2,6 +2,7 @@
 name = "test-rp-rs"
 version = "0.1.0"
 edition = "2021"
+homepage = "https://github.com/beeb"
 
 [dependencies]
 atomic-polyfill = "1"

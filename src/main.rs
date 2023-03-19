@@ -135,6 +135,20 @@ async fn main(spawner: Spawner) {
 
     let mut content: String<2000> = String::new();
     let mut req_rx_buf = [0; 4096];
+    let headers: &[(&str, &str)] = [
+        ("Authorization", concat!("Bot ", env!("DISCORD_BOT_TOKEN"))),
+        (
+            "User-Agent",
+            concat!(
+                "DiscordBot (",
+                env!("CARGO_PKG_HOMEPAGE"),
+                ", ",
+                env!("CARGO_PKG_VERSION"),
+                ")"
+            ),
+        ),
+    ]
+    .as_slice();
 
     loop {
         content.clear();
@@ -146,6 +160,7 @@ async fn main(spawner: Spawner) {
             .unwrap()
             .body(body)
             .content_type(reqwless::headers::ContentType::ApplicationJson)
+            .headers(headers)
             .send(&mut req_rx_buf)
             .await
         {
