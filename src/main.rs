@@ -124,7 +124,7 @@ async fn main(spawner: Spawner) {
     let mut rx_buffer = [0; 4096];
     let mut tx_buffer = [0; 4096];
     let tls_config = TlsConfig::new(seed, &mut rx_buffer, &mut tx_buffer, TlsVerify::None);
-    let dns = DnsResolver { stack };
+    let dns = StaticDnsResolver {};
     let mut client = HttpClient::new_with_tls(&client, &dns, tls_config);
 
     let url = concat!(
@@ -266,6 +266,24 @@ impl Dns for DnsResolver {
         let addr = res.as_bytes();
         let addr = IpAddr::V4(Ipv4Addr::new(addr[0], addr[1], addr[2], addr[3]));
         Ok(addr)
+    }
+
+    async fn get_host_by_address(&self, _addr: IpAddr) -> Result<String<256>, Self::Error> {
+        Ok(String::new())
+    }
+}
+
+struct StaticDnsResolver;
+
+impl Dns for StaticDnsResolver {
+    type Error = Infallible;
+
+    async fn get_host_by_name(
+        &self,
+        _host: &str,
+        _addr_type: AddrType,
+    ) -> Result<IpAddr, Self::Error> {
+        Ok(IpAddr::V4(Ipv4Addr::new(162, 159, 135, 232)))
     }
 
     async fn get_host_by_address(&self, _addr: IpAddr) -> Result<String<256>, Self::Error> {
