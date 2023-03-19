@@ -14,12 +14,16 @@ use embassy_net::{
     tcp::client::{TcpClient, TcpClientState},
     Config, Stack, StackResources,
 };
-use embassy_rp::gpio::{Flex, Level, Output};
 use embassy_rp::peripherals::{PIN_23, PIN_24, PIN_25, PIN_29};
+use embassy_rp::{
+    clocks::RoscRng,
+    gpio::{Flex, Level, Output},
+};
 use embassy_time::{Duration, Timer};
 use embedded_hal_1::spi::ErrorType;
 use embedded_hal_async::spi::{ExclusiveDevice, SpiBusFlush, SpiBusRead, SpiBusWrite};
 use embedded_nal_async::{heapless::String, AddrType, Dns, IpAddr, Ipv4Addr};
+use rand_core::RngCore;
 use reqwless::{
     client::{HttpClient, TlsConfig, TlsVerify},
     request::{Method, RequestBuilder},
@@ -88,7 +92,8 @@ async fn main(spawner: Spawner) {
     let config = Config::Dhcp(Default::default());
 
     // Generate random seed
-    let seed = 0xe109_eb3a_f41d_7e7b; // chosen by fair dice roll. guarenteed to be random.
+    let mut rng = RoscRng {};
+    let seed = rng.next_u64();
 
     // Init network stack
     let stack = &*singleton!(Stack::new(
@@ -104,9 +109,15 @@ async fn main(spawner: Spawner) {
 
     static STATE: TcpClientState<1, 1024, 1024> = TcpClientState::new();
     let client = TcpClient::new(stack, &STATE);
-    let mut rx_buffer = [0; 4096];
-    let mut tx_buffer = [0; 4096];
-    let tls_config = TlsConfig::new(seed, &mut rx_buffer, &mut tx_buffer, TlsVerify::None);
+    let mut tls_read_buffer = [0; 16384];
+    let mut tls_write_buffer = [0; 16384];
+    let tls_seed = rng.next_u64();
+    let tls_config = TlsConfig::new(
+        tls_seed,
+        &mut tls_read_buffer,
+        &mut tls_write_buffer,
+        TlsVerify::None,
+    );
     let dns = StaticDnsResolver {};
     let mut client = HttpClient::new_with_tls(&client, &dns, tls_config);
 

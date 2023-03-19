@@ -1252,6 +1252,7 @@ dependencies = [
  "embedded-nal-async",
  "futures",
  "panic-probe",
+ "rand_core",
  "reqwless",
  "static_cell",
 ]
