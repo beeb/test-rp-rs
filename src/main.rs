@@ -61,13 +61,6 @@ async fn main(spawner: Spawner) {
     let fw = include_bytes!("../firmware/43439A0.bin");
     let clm = include_bytes!("../firmware/43439A0_clm.bin");
 
-    // To make flashing faster for development, you may want to flash the firmwares independently
-    // at hardcoded addresses, instead of baking them into the program with `include_bytes!`:
-    //     probe-rs-cli download 43439A0.bin --format bin --chip RP2040 --base-address 0x10100000
-    //     probe-rs-cli download 43439A0.clm_blob --format bin --chip RP2040 --base-address 0x10140000
-    //let fw = unsafe { core::slice::from_raw_parts(0x10100000 as *const u8, 224190) };
-    //let clm = unsafe { core::slice::from_raw_parts(0x10140000 as *const u8, 4752) };
-
     let pwr = Output::new(p.PIN_23, Level::Low);
     let cs = Output::new(p.PIN_25, Level::High);
     let clk = Output::new(p.PIN_29, Level::Low);
@@ -88,17 +81,11 @@ async fn main(spawner: Spawner) {
         .set_power_management(cyw43::PowerManagementMode::PowerSave)
         .await;
 
-    //control.join_open(env!("WIFI_NETWORK")).await;
     control
         .join_wpa2(env!("WIFI_NETWORK"), env!("WIFI_PASSWORD"))
         .await;
 
     let config = Config::Dhcp(Default::default());
-    //let config = embassy_net::Config::Static(embassy_net::Config {
-    //    address: Ipv4Cidr::new(Ipv4Address::new(192, 168, 69, 2), 24),
-    //    dns_servers: Vec::new(),
-    //    gateway: Some(Ipv4Address::new(192, 168, 69, 1)),
-    //});
 
     // Generate random seed
     let seed = 0xe109_eb3a_f41d_7e7b; // chosen by fair dice roll. guarenteed to be random.
@@ -114,10 +101,6 @@ async fn main(spawner: Spawner) {
     unwrap!(spawner.spawn(net_task(stack)));
 
     // And now we can use it!
-
-    /* let mut rx_buffer = [0; 4096];
-    let mut tx_buffer = [0; 4096];
-    let mut buf = [0; 4096]; */
 
     static STATE: TcpClientState<1, 1024, 1024> = TcpClientState::new();
     let client = TcpClient::new(stack, &STATE);
