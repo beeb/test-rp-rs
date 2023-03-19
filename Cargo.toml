@@ -40,6 +40,9 @@ futures = { version = "0.3", default-features = false, features = [
 panic-probe = { version = "0.3", features = ["print-defmt"] }
 static_cell = "1"
 
+[build-dependencies]
+dotenvy = "0.15.6"
+
 [patch.crates-io]
 embassy-executor = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
 embassy-time = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
@@ -79,3 +82,8 @@ debug = false
 debug-assertions = false
 opt-level = 0
 overflow-checks = false
+
+[[bin]]
+name = "test-rp-rs"
+test = false
+bench = false

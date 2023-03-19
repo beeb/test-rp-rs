@@ -13,7 +13,15 @@ use std::fs::File;
 use std::io::Write;
 use std::path::PathBuf;
 
+use dotenvy::dotenv;
+
 fn main() {
+    dotenv().ok();
+    let wifi_network = env::var("WIFI_NETWORK").unwrap();
+    println!("cargo:rustc-env=WIFI_NETWORK={wifi_network}");
+    let wifi_pwd = env::var("WIFI_PASSWORD").unwrap();
+    println!("cargo:rustc-env=WIFI_PASSWORD={wifi_pwd}");
+
     // Put `memory.x` in our output directory and ensure it's
     // on the linker search path.
     let out = &PathBuf::from(env::var_os("OUT_DIR").unwrap());
