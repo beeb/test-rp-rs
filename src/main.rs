@@ -117,6 +117,7 @@ async fn main(spawner: Spawner) {
     );
 
     let mut content: String<2000> = String::new();
+    content.push_str("{\"content\": \"Hello World!\"}").unwrap();
     let mut req_rx_buf = [0; 4096];
     let headers = [
         ("Authorization", concat!("Bot ", env!("DISCORD_BOT_TOKEN"))),
@@ -134,14 +135,12 @@ async fn main(spawner: Spawner) {
     .as_slice();
 
     loop {
-        content.clear();
-        content.push_str("{\"content\": \"Hello World!\"}").unwrap();
-        let body = content.as_bytes();
+        //content.clear();
         if let Err(e) = client
             .request(Method::POST, url)
             .await
             .unwrap()
-            .body(body)
+            .body(content.as_bytes())
             .content_type(reqwless::headers::ContentType::ApplicationJson)
             .headers(headers)
             .send(&mut req_rx_buf)
