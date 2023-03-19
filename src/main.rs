@@ -19,7 +19,11 @@ use embassy_rp::peripherals::{PIN_23, PIN_24, PIN_25, PIN_29};
 use embedded_hal_1::spi::ErrorType;
 use embedded_hal_async::spi::{ExclusiveDevice, SpiBusFlush, SpiBusRead, SpiBusWrite};
 use embedded_nal_async::{heapless::String, AddrType, Dns, IpAddr, Ipv4Addr};
-use reqwless::client::{HttpClient, TlsConfig, TlsVerify};
+use reqwless::{
+    client::{HttpClient, TlsConfig, TlsVerify},
+    request::{Method, RequestBuilder},
+};
+use serde::Serialize;
 use static_cell::StaticCell;
 use {defmt_rtt as _, panic_probe as _};
 
@@ -120,50 +124,36 @@ async fn main(spawner: Spawner) {
     let mut rx_buffer = [0; 4096];
     let mut tx_buffer = [0; 4096];
     let tls_config = TlsConfig::new(seed, &mut rx_buffer, &mut tx_buffer, TlsVerify::None);
-    let dns = StaticDns { stack };
+    let dns = DnsResolver { stack };
     let mut client = HttpClient::new_with_tls(&client, &dns, tls_config);
 
     let url = concat!(
-        "https://discord.com/api/channels/{}/messages",
-        env!("DISCORD_CHANNEL_ID")
+        "https://discord.com/api/channels/",
+        env!("DISCORD_CHANNEL_ID"),
+        "/messages"
     );
 
+    let mut req_tx_buf = [0; 4096];
+    let mut req_rx_buf = [0; 4096];
+
     loop {
-
-        /* let mut socket = TcpSocket::new(stack, &mut rx_buffer, &mut tx_buffer);
-        socket.set_timeout(Some(embassy_net::SmolDuration::from_secs(10)));
-
-        info!("Listening on TCP:1234...");
-        if let Err(e) = socket.accept(1234).await {
-            warn!("accept error: {:?}", e);
-            continue;
+        let body = CreateMessagePayload {
+            content: "Hello World!",
+        };
+        if serde_json_core::to_slice(&body, &mut req_tx_buf).is_err() {
+            error!("Error serializing JSON");
         }
-
-        info!("Received connection from {:?}", socket.remote_endpoint());
-
-        loop {
-            let n = match socket.read(&mut buf).await {
-                Ok(0) => {
-                    warn!("read EOF");
-                    break;
-                }
-                Ok(n) => n,
-                Err(e) => {
-                    warn!("read error: {:?}", e);
-                    break;
-                }
-            };
-
-            info!("rxd {}", from_utf8(&buf[..n]).unwrap());
-
-            match socket.write_all(&buf[..n]).await {
-                Ok(()) => {}
-                Err(e) => {
-                    warn!("write error: {:?}", e);
-                    break;
-                }
-            };
-        } */
+        if let Err(e) = client
+            .request(Method::POST, url)
+            .await
+            .unwrap()
+            .body(&req_tx_buf)
+            .content_type(reqwless::headers::ContentType::ApplicationJson)
+            .send(&mut req_rx_buf)
+            .await
+        {
+            error!("HTTP POST Error: {:?}", e);
+        }
     }
 }
 
@@ -240,11 +230,11 @@ impl SpiBusWrite<u32> for MySpi {
     }
 }
 
-struct StaticDns {
+struct DnsResolver {
     stack: &'static Stack<NetDriver<'static>>,
 }
 
-impl Dns for StaticDns {
+impl Dns for DnsResolver {
     type Error = dns::Error;
 
     async fn get_host_by_name(
@@ -267,4 +257,9 @@ impl Dns for StaticDns {
     async fn get_host_by_address(&self, _addr: IpAddr) -> Result<String<256>, Self::Error> {
         Ok(String::new())
     }
+}
+
+#[derive(Serialize)]
+struct CreateMessagePayload<'a> {
+    content: &'a str,
 }
