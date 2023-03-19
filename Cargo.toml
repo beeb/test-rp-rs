@@ -41,8 +41,6 @@ futures = { version = "0.3", default-features = false, features = [
 ] }
 panic-probe = { version = "0.3", features = ["print-defmt"] }
 reqwless = { version = "0.5.0", features = ["defmt"] }
-serde = { version = "1.0.157", default-features = false, features = ["derive"] }
-serde-json-core = "0.5.0"
 static_cell = "1"
 
 [build-dependencies]

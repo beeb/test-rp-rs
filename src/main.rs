@@ -16,6 +16,7 @@ use embassy_net::{
 };
 use embassy_rp::gpio::{Flex, Level, Output};
 use embassy_rp::peripherals::{PIN_23, PIN_24, PIN_25, PIN_29};
+use embassy_time::{Duration, Timer};
 use embedded_hal_1::spi::ErrorType;
 use embedded_hal_async::spi::{ExclusiveDevice, SpiBusFlush, SpiBusRead, SpiBusWrite};
 use embedded_nal_async::{heapless::String, AddrType, Dns, IpAddr, Ipv4Addr};
@@ -23,7 +24,6 @@ use reqwless::{
     client::{HttpClient, TlsConfig, TlsVerify},
     request::{Method, RequestBuilder},
 };
-use serde::Serialize;
 use static_cell::StaticCell;
 use {defmt_rtt as _, panic_probe as _};
 
@@ -133,27 +133,26 @@ async fn main(spawner: Spawner) {
         "/messages"
     );
 
-    let mut req_tx_buf = [0; 4096];
+    let mut content: String<2000> = String::new();
     let mut req_rx_buf = [0; 4096];
 
     loop {
-        let body = CreateMessagePayload {
-            content: "Hello World!",
-        };
-        if serde_json_core::to_slice(&body, &mut req_tx_buf).is_err() {
-            error!("Error serializing JSON");
-        }
+        content.clear();
+        content.push_str("{\"content\": \"Hello World!\"}").unwrap();
+        let body = content.as_bytes();
         if let Err(e) = client
             .request(Method::POST, url)
             .await
             .unwrap()
-            .body(&req_tx_buf)
+            .body(body)
             .content_type(reqwless::headers::ContentType::ApplicationJson)
             .send(&mut req_rx_buf)
             .await
         {
             error!("HTTP POST Error: {:?}", e);
         }
+
+        Timer::after(Duration::from_secs(60)).await;
     }
 }
 
@@ -257,9 +256,4 @@ impl Dns for DnsResolver {
     async fn get_host_by_address(&self, _addr: IpAddr) -> Result<String<256>, Self::Error> {
         Ok(String::new())
     }
-}
-
-#[derive(Serialize)]
-struct CreateMessagePayload<'a> {
-    content: &'a str,
 }
