@@ -20,6 +20,7 @@ embassy-net = { features = [
     "medium-ethernet",
     "unstable-traits",
     "nightly",
+    "dns",
 ] }
 embassy-rp = { features = [
     "defmt",
@@ -32,12 +33,14 @@ embassy-time = { features = ["defmt", "defmt-timestamp-uptime"] }
 embedded-hal-1 = { package = "embedded-hal", version = "1.0.0-alpha.9" }
 embedded-hal-async = { version = "0.2.0-alpha.0" }
 embedded-io = { version = "0.4", features = ["async", "defmt"] }
+embedded-nal-async = "0.4.0"
 futures = { version = "0.3", default-features = false, features = [
     "async-await",
     "cfg-target-has-atomic",
     "unstable",
 ] }
 panic-probe = { version = "0.3", features = ["print-defmt"] }
+reqwless = { version = "0.5.0", features = ["defmt"] }
 static_cell = "1"
 
 [build-dependencies]

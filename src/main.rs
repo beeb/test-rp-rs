@@ -6,19 +6,22 @@
 
 use core::convert::Infallible;
 
+use cyw43::NetDriver;
 use defmt::*;
 use embassy_executor::Spawner;
-use embassy_net::tcp::TcpSocket;
-use embassy_net::{Config, Stack, StackResources};
+use embassy_net::{
+    dns::{self, DnsQueryType},
+    tcp::client::{TcpClient, TcpClientState},
+    Config, Stack, StackResources,
+};
 use embassy_rp::gpio::{Flex, Level, Output};
 use embassy_rp::peripherals::{PIN_23, PIN_24, PIN_25, PIN_29};
 use embedded_hal_1::spi::ErrorType;
 use embedded_hal_async::spi::{ExclusiveDevice, SpiBusFlush, SpiBusRead, SpiBusWrite};
-use embedded_io::asynch::Write;
+use embedded_nal_async::{heapless::String, AddrType, Dns, IpAddr, Ipv4Addr};
+use reqwless::client::{HttpClient, TlsConfig, TlsVerify};
 use static_cell::StaticCell;
 use {defmt_rtt as _, panic_probe as _};
-
-use core::str::from_utf8;
 
 macro_rules! singleton {
     ($val:expr) => {{
@@ -108,12 +111,26 @@ async fn main(spawner: Spawner) {
 
     // And now we can use it!
 
+    /* let mut rx_buffer = [0; 4096];
+    let mut tx_buffer = [0; 4096];
+    let mut buf = [0; 4096]; */
+
+    static STATE: TcpClientState<1, 1024, 1024> = TcpClientState::new();
+    let client = TcpClient::new(stack, &STATE);
     let mut rx_buffer = [0; 4096];
     let mut tx_buffer = [0; 4096];
-    let mut buf = [0; 4096];
+    let tls_config = TlsConfig::new(seed, &mut rx_buffer, &mut tx_buffer, TlsVerify::None);
+    let dns = StaticDns { stack };
+    let mut client = HttpClient::new_with_tls(&client, &dns, tls_config);
+
+    let url = concat!(
+        "https://discord.com/api/channels/{}/messages",
+        env!("DISCORD_CHANNEL_ID")
+    );
 
     loop {
-        let mut socket = TcpSocket::new(stack, &mut rx_buffer, &mut tx_buffer);
+
+        /* let mut socket = TcpSocket::new(stack, &mut rx_buffer, &mut tx_buffer);
         socket.set_timeout(Some(embassy_net::SmolDuration::from_secs(10)));
 
         info!("Listening on TCP:1234...");
@@ -146,7 +163,7 @@ async fn main(spawner: Spawner) {
                     break;
                 }
             };
-        }
+        } */
     }
 }
 
@@ -220,5 +237,34 @@ impl SpiBusWrite<u32> for MySpi {
 
         self.dio.set_as_input();
         Ok(())
+    }
+}
+
+struct StaticDns {
+    stack: &'static Stack<NetDriver<'static>>,
+}
+
+impl Dns for StaticDns {
+    type Error = dns::Error;
+
+    async fn get_host_by_name(
+        &self,
+        host: &str,
+        addr_type: AddrType,
+    ) -> Result<IpAddr, Self::Error> {
+        let dns_query_type = match addr_type {
+            AddrType::IPv4 => DnsQueryType::A,
+            AddrType::IPv6 => DnsQueryType::Aaaa,
+            AddrType::Either => DnsQueryType::A,
+        };
+        let res = self.stack.dns_query(host, dns_query_type).await?;
+        let res = res.first().ok_or(dns::Error::Failed)?;
+        let addr = res.as_bytes();
+        let addr = IpAddr::V4(Ipv4Addr::new(addr[0], addr[1], addr[2], addr[3]));
+        Ok(addr)
+    }
+
+    async fn get_host_by_address(&self, _addr: IpAddr) -> Result<String<256>, Self::Error> {
+        Ok(String::new())
     }
 }

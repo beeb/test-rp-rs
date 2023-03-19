@@ -19,8 +19,12 @@ fn main() {
     dotenv().ok();
     let wifi_network = env::var("WIFI_NETWORK").unwrap();
     println!("cargo:rustc-env=WIFI_NETWORK={wifi_network}");
-    let wifi_pwd = env::var("WIFI_PASSWORD").unwrap();
-    println!("cargo:rustc-env=WIFI_PASSWORD={wifi_pwd}");
+    let wifi_password = env::var("WIFI_PASSWORD").unwrap();
+    println!("cargo:rustc-env=WIFI_PASSWORD={wifi_password}");
+    let discord_bot_token = env::var("DISCORD_BOT_TOKEN").unwrap();
+    println!("cargo:rustc-env=DISCORD_BOT_TOKEN={discord_bot_token}");
+    let discord_channel_id = env::var("DISCORD_CHANNEL_ID").unwrap();
+    println!("cargo:rustc-env=DISCORD_CHANNEL_ID={discord_channel_id}");
 
     // Put `memory.x` in our output directory and ensure it's
     // on the linker search path.
