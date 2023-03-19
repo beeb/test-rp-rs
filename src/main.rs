@@ -135,7 +135,7 @@ async fn main(spawner: Spawner) {
 
     let mut content: String<2000> = String::new();
     let mut req_rx_buf = [0; 4096];
-    let headers: &[(&str, &str)] = [
+    let headers = [
         ("Authorization", concat!("Bot ", env!("DISCORD_BOT_TOKEN"))),
         (
             "User-Agent",
