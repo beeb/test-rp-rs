@@ -99,16 +99,18 @@ async fn main(spawner: Spawner) {
     let stack = &*singleton!(Stack::new(
         net_device,
         config,
-        singleton!(StackResources::<2>::new()),
+        singleton!(StackResources::<3>::new()),
         seed
     ));
 
     unwrap!(spawner.spawn(net_task(stack)));
 
-    // And now we can use it!
+    info!("Network stack initialized");
 
     static STATE: TcpClientState<1, 1024, 1024> = TcpClientState::new();
+    debug!("State initialized");
     let client = TcpClient::new(stack, &STATE);
+    debug!("TCP Client initialized");
     let mut tls_read_buffer = [0; 16384];
     let mut tls_write_buffer = [0; 16384];
     let tls_seed = rng.next_u64();
@@ -118,17 +120,23 @@ async fn main(spawner: Spawner) {
         &mut tls_write_buffer,
         TlsVerify::None,
     );
-    let dns = StaticDnsResolver {};
+    debug!("TLS Config initialized");
+    //let dns = StaticDnsResolver {};
+    let dns = DnsResolver { stack };
+    debug!("DNS Resolver initialized");
     let mut client = HttpClient::new_with_tls(&client, &dns, tls_config);
+    debug!("HTTP Client initialized");
 
     let url = concat!(
         "https://discord.com/api/channels/",
         env!("DISCORD_CHANNEL_ID"),
         "/messages"
     );
+    debug!("URL: {}", url);
 
     let mut content: String<2000> = String::new();
     content.push_str("{\"content\": \"Hello World!\"}").unwrap();
+    debug!("Content: {}", content);
     let mut req_rx_buf = [0; 4096];
     let headers = [
         ("Authorization", concat!("Bot ", env!("DISCORD_BOT_TOKEN"))),
@@ -144,23 +152,26 @@ async fn main(spawner: Spawner) {
         ),
     ]
     .as_slice();
+    debug!("Headers: {:?}", headers);
 
     loop {
-        //content.clear();
-        if let Err(e) = client
-            .request(Method::POST, url)
-            .await
-            .unwrap()
-            .body(content.as_bytes())
-            .content_type(reqwless::headers::ContentType::ApplicationJson)
-            .headers(headers)
-            .send(&mut req_rx_buf)
-            .await
-        {
-            error!("HTTP POST Error: {:?}", e);
+        match client.request(Method::POST, url).await {
+            Err(e) => {
+                error!("Can't create POST request: {:?}", e);
+            }
+            Ok(req) => {
+                if let Err(e) = req
+                    .body(content.as_bytes())
+                    .content_type(reqwless::headers::ContentType::ApplicationJson)
+                    .headers(headers)
+                    .send(&mut req_rx_buf)
+                    .await
+                {
+                    error!("HTTP POST Error: {:?}", e);
+                }
+            }
         }
-
-        Timer::after(Duration::from_secs(60)).await;
+        Timer::after(Duration::from_secs(10)).await;
     }
 }
 
@@ -257,26 +268,12 @@ impl Dns for DnsResolver {
         let res = self.stack.dns_query(host, dns_query_type).await?;
         let res = res.first().ok_or(dns::Error::Failed)?;
         let addr = res.as_bytes();
+        debug!(
+            "Resolved {} to {}.{}.{}.{}",
+            host, addr[0], addr[1], addr[2], addr[3]
+        );
         let addr = IpAddr::V4(Ipv4Addr::new(addr[0], addr[1], addr[2], addr[3]));
         Ok(addr)
-    }
-
-    async fn get_host_by_address(&self, _addr: IpAddr) -> Result<String<256>, Self::Error> {
-        Ok(String::new())
-    }
-}
-
-struct StaticDnsResolver;
-
-impl Dns for StaticDnsResolver {
-    type Error = Infallible;
-
-    async fn get_host_by_name(
-        &self,
-        _host: &str,
-        _addr_type: AddrType,
-    ) -> Result<IpAddr, Self::Error> {
-        Ok(IpAddr::V4(Ipv4Addr::new(162, 159, 135, 232)))
     }
 
     async fn get_host_by_address(&self, _addr: IpAddr) -> Result<String<256>, Self::Error> {
