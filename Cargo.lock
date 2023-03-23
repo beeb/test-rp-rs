@@ -644,8 +644,7 @@ dependencies = [
 [[package]]
 name = "embedded-tls"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "198699fbf7768a87254e773ea9b4b98bd47dbeca5d827422c92fe6f92defc6ee"
+source = "git+https://github.com/drogue-iot/embedded-tls?branch=main#4543b6c5a356876ce0502a3dc6d73ee1b5107c77"
 dependencies = [
  "aes-gcm",
  "defmt",

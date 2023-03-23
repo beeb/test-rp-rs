@@ -57,6 +57,7 @@ embassy-rp = { git = "https://github.com/embassy-rs/embassy", branch = "master" 
 embassy-net = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
 embassy-net-driver = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
 embassy-net-driver-channel = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
+embedded-tls = { git = "https://github.com/drogue-iot/embedded-tls", branch = "main" }
 
 [profile.dev]
 debug = 2
