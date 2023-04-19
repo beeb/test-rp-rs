@@ -88,7 +88,7 @@ version = "0.1.11"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "e3ff7eb3f316534d83a8a2c3d1674ace8a5a71198eba31e2e2b597833f699b28"
 dependencies = [
- "critical-section",
+ "critical-section 1.1.1",
 ]
 
 [[package]]
@@ -97,7 +97,7 @@ version = "1.0.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "c314e70d181aa6053b26e3f7fbf86d1dfff84f816a6175b967666b3506ef7289"
 dependencies = [
- "critical-section",
+ "critical-section 1.1.1",
 ]
 
 [[package]]
@@ -126,6 +126,12 @@ checksum = "5deb64efa5bd81e31fcd1938615a6d98c82eafcbcd787162b6f63b91d6bac5b3"
 dependencies = [
  "rustc_version 0.2.3",
 ]
+
+[[package]]
+name = "bare-metal"
+version = "1.0.0"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "f8fe8f5a8a398345e52358e18ff07cc17a568fbca5c6f73873d3a62056309603"
 
 [[package]]
 name = "base16ct"
@@ -225,9 +231,9 @@ version = "0.7.7"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "8ec610d8f49840a5b376c69663b6369e71f4b34484b9b2eb29fb918d92516cb9"
 dependencies = [
- "bare-metal",
+ "bare-metal 0.2.5",
  "bitfield",
- "critical-section",
+ "critical-section 1.1.1",
  "embedded-hal 0.2.7",
  "volatile-register",
 ]
@@ -259,6 +265,16 @@ source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "280a9f2d8b3a38871a3c8a46fb80db65e5e5ed97da80c4d08bf27fb63e35e181"
 dependencies = [
  "libc",
+]
+
+[[package]]
+name = "critical-section"
+version = "0.2.8"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "c1706d332edc22aef4d9f23a6bb1c92360a403013c291af51247a737472dcae6"
+dependencies = [
+ "bare-metal 1.0.0",
+ "critical-section 1.1.1",
 ]
 
 [[package]]
@@ -371,9 +387,9 @@ dependencies = [
 
 [[package]]
 name = "defmt"
-version = "0.3.4"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "956673bd3cb347512bf988d1e8d89ac9a82b64f6eec54d3c01c3529dac019882"
+checksum = "d3a0ae7494d9bff013d7b89471f4c424356a71e9752e0c78abe7e6c608a16bb3"
 dependencies = [
  "bitflags",
  "defmt-macros",
@@ -403,11 +419,11 @@ dependencies = [
 
 [[package]]
 name = "defmt-rtt"
-version = "0.4.0"
+version = "0.3.2"
 source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "609923761264dd99ed9c7d209718cda4631c5fe84668e0f0960124cbb844c49f"
+checksum = "1d2cbbbd58847d508d97629b32cd9730a2d28532f71e219714614406029f18b1"
 dependencies = [
- "critical-section",
+ "critical-section 0.2.8",
  "defmt",
 ]
 
@@ -498,7 +514,7 @@ dependencies = [
  "atomic-polyfill 1.0.2",
  "cfg-if",
  "cortex-m",
- "critical-section",
+ "critical-section 1.1.1",
  "embassy-executor",
  "embassy-hal-common",
  "embassy-macros",
@@ -526,7 +542,7 @@ source = "git+https://github.com/embassy-rs/embassy?branch=master#37181c79d9a0c6
 dependencies = [
  "atomic-polyfill 1.0.2",
  "cortex-m",
- "critical-section",
+ "critical-section 1.1.1",
  "defmt",
  "embassy-macros",
  "embassy-time",
@@ -576,7 +592,7 @@ dependencies = [
  "embedded-nal-async",
  "futures",
  "generic-array 0.14.7",
- "heapless",
+ "heapless 0.7.16",
  "managed",
  "smoltcp",
  "stable_deref_trait",
@@ -609,7 +625,7 @@ dependencies = [
  "cfg-if",
  "cortex-m",
  "cortex-m-rt",
- "critical-section",
+ "critical-section 1.1.1",
  "defmt",
  "embassy-cortex-m",
  "embassy-embedded-hal",
@@ -642,10 +658,10 @@ checksum = "b6ea38e6ea5d0361d087680f786c19a1454becb06174790280534a3be05ed839"
 dependencies = [
  "atomic-polyfill 1.0.2",
  "cfg-if",
- "critical-section",
+ "critical-section 1.1.1",
  "embedded-io 0.3.1",
  "futures-util",
- "heapless",
+ "heapless 0.7.16",
 ]
 
 [[package]]
@@ -654,10 +670,10 @@ version = "0.2.0"
 source = "git+https://github.com/embassy-rs/embassy?branch=master#37181c79d9a0c6642d4b31bfb1d1816c9ee1b315"
 dependencies = [
  "cfg-if",
- "critical-section",
+ "critical-section 1.1.1",
  "embedded-io 0.4.0",
  "futures-util",
- "heapless",
+ "heapless 0.7.16",
 ]
 
 [[package]]
@@ -667,11 +683,11 @@ source = "git+https://github.com/embassy-rs/embassy?branch=master#37181c79d9a0c6
 dependencies = [
  "atomic-polyfill 1.0.2",
  "cfg-if",
- "critical-section",
+ "critical-section 1.1.1",
  "defmt",
  "embedded-hal 0.2.7",
  "futures-util",
- "heapless",
+ "heapless 0.7.16",
 ]
 
 [[package]]
@@ -738,7 +754,7 @@ version = "0.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "db9efecb57ab54fa918730f2874d7d37647169c50fa1357fecb81abee840b113"
 dependencies = [
- "heapless",
+ "heapless 0.7.16",
  "nb 1.1.0",
  "no-std-net 0.5.0",
 ]
@@ -751,7 +767,7 @@ checksum = "27ce84f518ca912777ec143db235f4d615e3bf8d4e46d507d6ef12daf5b1df98"
 dependencies = [
  "embedded-io 0.4.0",
  "embedded-nal",
- "heapless",
+ "heapless 0.7.16",
  "no-std-net 0.6.0",
 ]
 
@@ -773,15 +789,16 @@ dependencies = [
 [[package]]
 name = "embedded-tls"
 version = "0.12.0"
-source = "registry+https://github.com/rust-lang/crates.io-index"
-checksum = "198699fbf7768a87254e773ea9b4b98bd47dbeca5d827422c92fe6f92defc6ee"
+source = "git+https://github.com/beeb/embedded-tls?branch=temp-version#26a1bb534cb938523fb09eece58c6af4f115ce57"
 dependencies = [
  "aes-gcm",
+ "atomic-polyfill 1.0.2",
  "defmt",
  "digest",
  "embedded-io 0.4.0",
  "generic-array 0.14.7",
- "heapless",
+ "heapless 0.6.1",
+ "heapless 0.7.16",
  "hkdf",
  "hmac",
  "p256",
@@ -977,6 +994,15 @@ dependencies = [
 
 [[package]]
 name = "hash32"
+version = "0.1.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "d4041af86e63ac4298ce40e5cca669066e75b6f1aa3390fe2561ffa5e1d9f4cc"
+dependencies = [
+ "byteorder",
+]
+
+[[package]]
+name = "hash32"
 version = "0.2.1"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "b0c35f58762feb77d74ebe43bdbc3210f09be9fe6742234d573bacc26ed92b67"
@@ -992,13 +1018,25 @@ checksum = "8a9ee70c43aaf417c914396645a0fa852624801b24ebb7ae78fe8272889ac888"
 
 [[package]]
 name = "heapless"
+version = "0.6.1"
+source = "registry+https://github.com/rust-lang/crates.io-index"
+checksum = "634bd4d29cbf24424d0a4bfcbf80c6960129dc24424752a7d1d1390607023422"
+dependencies = [
+ "as-slice 0.1.5",
+ "generic-array 0.14.7",
+ "hash32 0.1.1",
+ "stable_deref_trait",
+]
+
+[[package]]
+name = "heapless"
 version = "0.7.16"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "db04bc24a18b9ea980628ecf00e6c0264f3c1426dac36c00cb49b6fbad8b0743"
 dependencies = [
  "atomic-polyfill 0.1.11",
  "defmt",
- "hash32",
+ "hash32 0.2.1",
  "rustc_version 0.4.0",
  "spin",
  "stable_deref_trait",
@@ -1508,7 +1546,7 @@ dependencies = [
  "embedded-io 0.4.0",
  "embedded-nal-async",
  "embedded-tls",
- "heapless",
+ "heapless 0.7.16",
  "hex",
  "httparse",
  "nourl",
@@ -1637,7 +1675,7 @@ dependencies = [
  "byteorder",
  "cfg-if",
  "defmt",
- "heapless",
+ "heapless 0.7.16",
  "managed",
 ]
 
@@ -2023,8 +2061,3 @@ name = "zeroize"
 version = "1.6.0"
 source = "registry+https://github.com/rust-lang/crates.io-index"
 checksum = "2a0956f1ba7c7909bfb66c2e9e4124ab6f6482560f6628b5aaeba39207c9aad9"
-
-[[patch.unused]]
-name = "embedded-tls"
-version = "0.13.0"
-source = "git+https://github.com/drogue-iot/embedded-tls?branch=main#715ee5fe0a6481fc58e01562f9ccde66119dade7"

@@ -12,8 +12,8 @@ cyw43 = { git = "https://github.com/embassy-rs/cyw43", branch = "master", featur
     "defmt",
 ] }
 cyw43-pio = { git = "https://github.com/embassy-rs/cyw43", branch = "master" }
-defmt = "0.3"
-defmt-rtt = "0.4"
+defmt = "=0.3.2"
+defmt-rtt = "0.3"
 embassy-executor = { features = [
     "defmt",
     "integrated-timers",
@@ -64,7 +64,7 @@ embassy-rp = { git = "https://github.com/embassy-rs/embassy", branch = "master" 
 embassy-net = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
 embassy-net-driver = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
 embassy-net-driver-channel = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
-embedded-tls = { git = "https://github.com/drogue-iot/embedded-tls", branch = "main" }
+embedded-tls = { git = "https://github.com/beeb/embedded-tls", branch = "temp-version" }
 
 [profile.dev]
 debug = 2
