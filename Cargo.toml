@@ -11,9 +11,15 @@ cortex-m-rt = "0.7"
 cyw43 = { git = "https://github.com/embassy-rs/cyw43", branch = "master", features = [
     "defmt",
 ] }
+cyw43-pio = { git = "https://github.com/embassy-rs/cyw43", branch = "master" }
 defmt = "0.3"
 defmt-rtt = "0.4"
-embassy-executor = { features = ["defmt", "nightly", "integrated-timers"] }
+embassy-executor = { features = [
+    "defmt",
+    "integrated-timers",
+    "executor-thread",
+    "arch-cortex-m",
+] }
 embassy-net = { features = [
     "defmt",
     "tcp",
@@ -29,6 +35,7 @@ embassy-rp = { features = [
     "nightly",
     "unstable-pac",
     "time-driver",
+    "pio",
 ] }
 embassy-time = { features = ["defmt", "defmt-timestamp-uptime"] }
 embedded-hal-1 = { package = "embedded-hal", version = "1.0.0-alpha.9" }
