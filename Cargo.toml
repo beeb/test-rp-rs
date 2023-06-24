@@ -8,17 +8,17 @@ homepage = "https://github.com/beeb"
 atomic-polyfill = "1"
 cortex-m = { version = "0.7", features = ["critical-section-single-core"] }
 cortex-m-rt = "0.7"
-cyw43 = { git = "https://github.com/embassy-rs/cyw43", branch = "master", features = [
-    "defmt",
-] }
-cyw43-pio = { git = "https://github.com/embassy-rs/cyw43", branch = "master" }
+cyw43 = { features = ["defmt"] }
+cyw43-pio = {}
 defmt = "=0.3.2"
 defmt-rtt = "0.3"
 embassy-executor = { features = [
     "defmt",
     "integrated-timers",
     "executor-thread",
+    "executor-interrupt",
     "arch-cortex-m",
+    "nightly",
 ] }
 embassy-net = { features = [
     "defmt",
@@ -29,13 +29,12 @@ embassy-net = { features = [
     "nightly",
     "dns",
 ] }
-embassy-rp = { features = [
+embassy-rp = { git = "https://github.com/embassy-rs/embassy", branch = "main", features = [
     "defmt",
     "unstable-traits",
     "nightly",
     "unstable-pac",
     "time-driver",
-    "pio",
 ] }
 embassy-time = { features = ["defmt", "defmt-timestamp-uptime"] }
 embedded-hal-1 = { package = "embedded-hal", version = "1.0.0-alpha.9" }
@@ -49,22 +48,24 @@ futures = { version = "0.3", default-features = false, features = [
 ] }
 panic-probe = { version = "0.3", features = ["print-defmt"] }
 rand_core = "0.6.4"
-reqwless = { version = "0.5.0", features = ["defmt"] }
+reqwless = { features = ["defmt"] }
 static_cell = "1"
 
 [build-dependencies]
 dotenvy = "0.15.6"
 
 [patch.crates-io]
-embassy-executor = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
-embassy-time = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
-embassy-futures = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
-embassy-sync = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
-embassy-rp = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
-embassy-net = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
-embassy-net-driver = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
-embassy-net-driver-channel = { git = "https://github.com/embassy-rs/embassy", branch = "master" }
-embedded-tls = { git = "https://github.com/beeb/embedded-tls", branch = "temp-version" }
+cyw43 = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+cyw43-pio = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+embassy-executor = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+embassy-time = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+embassy-futures = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+embassy-sync = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+embassy-net = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+embassy-net-driver = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+embassy-net-driver-channel = { git = "https://github.com/embassy-rs/embassy", branch = "main" }
+reqwless = { git = "https://github.com/drogue-iot/reqwless", branch = "main" }
+embedded-tls = { git = "https://github.com/drogue-iot/embedded-tls", branch = "main" }
 
 [profile.dev]
 debug = 2

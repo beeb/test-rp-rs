@@ -11,13 +11,13 @@ use embassy_executor::Spawner;
 use embassy_net::{
     dns::{self, DnsQueryType},
     tcp::client::{TcpClient, TcpClientState},
-    Config, Stack, StackResources,
+    Config, DhcpConfig, Stack, StackResources,
 };
 use embassy_rp::{
     clocks::RoscRng,
     gpio::{Level, Output},
-    peripherals::{DMA_CH0, PIN_23, PIN_25},
-    pio::{Pio0, PioPeripheral, PioStateMachineInstance, Sm0},
+    peripherals::{DMA_CH0, PIN_23, PIN_25, PIO0},
+    pio::Pio,
 };
 use embassy_time::{Duration, Timer};
 use embedded_nal_async::{heapless::String, AddrType, Dns, IpAddr, Ipv4Addr};
@@ -42,7 +42,7 @@ async fn wifi_task(
     runner: cyw43::Runner<
         'static,
         Output<'static, PIN_23>,
-        PioSpi<PIN_25, PioStateMachineInstance<Pio0, Sm0>, DMA_CH0>,
+        PioSpi<'static, PIN_25, PIO0, 0, DMA_CH0>,
     >,
 ) -> ! {
     runner.run().await
@@ -66,9 +66,17 @@ async fn main(spawner: Spawner) {
     let pwr = Output::new(p.PIN_23, Level::Low);
     let cs = Output::new(p.PIN_25, Level::High);
 
-    let (_, sm, _, _, _) = p.PIO0.split();
-    let dma = p.DMA_CH0;
-    let spi = PioSpi::new(sm, cs, p.PIN_24, p.PIN_29, dma);
+    let mut pio = Pio::new(p.PIO0);
+
+    let spi = PioSpi::new(
+        &mut pio.common,
+        pio.sm0,
+        pio.irq0,
+        cs,
+        p.PIN_24,
+        p.PIN_29,
+        p.DMA_CH0,
+    );
 
     let state = singleton!(cyw43::State::new());
     let (net_device, mut control, runner) = cyw43::new(state, pwr, spi, fw).await;
@@ -79,7 +87,8 @@ async fn main(spawner: Spawner) {
         .set_power_management(cyw43::PowerManagementMode::PowerSave)
         .await;
 
-    let config = Config::Dhcp(Default::default());
+    let dhcp_config = DhcpConfig::default();
+    let config = Config::dhcpv4(dhcp_config);
 
     // Generate random seed
     let mut rng = RoscRng {};
@@ -97,7 +106,8 @@ async fn main(spawner: Spawner) {
 
     control
         .join_wpa2(env!("WIFI_NETWORK"), env!("WIFI_PASSWORD"))
-        .await;
+        .await
+        .unwrap();
 
     info!("Network stack initialized");
 
