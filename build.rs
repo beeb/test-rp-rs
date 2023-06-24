@@ -25,6 +25,8 @@ fn main() {
     println!("cargo:rustc-env=DISCORD_BOT_TOKEN={discord_bot_token}");
     let discord_channel_id = env::var("DISCORD_CHANNEL_ID").unwrap();
     println!("cargo:rustc-env=DISCORD_CHANNEL_ID={discord_channel_id}");
+    let discord_app_id = env::var("DISCORD_APP_ID").unwrap();
+    println!("cargo:rustc-env=DISCORD_APP_ID={discord_app_id}");
 
     // Put `memory.x` in our output directory and ensure it's
     // on the linker search path.

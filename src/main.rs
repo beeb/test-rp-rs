@@ -22,12 +22,11 @@ use embassy_rp::{
 use embassy_time::{Duration, Timer};
 use embedded_nal_async::{heapless::String, AddrType, Dns, IpAddr, Ipv4Addr};
 use rand_core::RngCore;
-use reqwless::{
-    client::{HttpClient, TlsConfig, TlsVerify},
-    request::{Method, RequestBuilder},
-};
+use reqwless::client::{HttpClient, TlsConfig, TlsVerify};
 use static_cell::StaticCell;
 use {defmt_rtt as _, panic_probe as _};
+
+pub mod discord;
 
 macro_rules! singleton {
     ($val:expr) => {{
@@ -113,7 +112,7 @@ async fn main(spawner: Spawner) {
 
     static STATE: TcpClientState<1, 1024, 1024> = TcpClientState::new();
     debug!("State initialized");
-    let client = TcpClient::new(stack, &STATE);
+    let tcp_client = TcpClient::new(stack, &STATE);
     debug!("TCP Client initialized");
     let mut tls_read_buffer = [0; 16384];
     let mut tls_write_buffer = [0; 16384];
@@ -128,54 +127,27 @@ async fn main(spawner: Spawner) {
     //let dns = StaticDnsResolver {};
     let dns = DnsResolver { stack };
     debug!("DNS Resolver initialized");
-    let mut client = HttpClient::new_with_tls(&client, &dns, tls_config);
+    let mut client = HttpClient::new_with_tls(&tcp_client, &dns, tls_config);
     debug!("HTTP Client initialized");
 
-    let url = concat!(
-        "https://discord.com/api/channels/",
-        env!("DISCORD_CHANNEL_ID"),
-        "/messages"
-    );
-    debug!("URL: {}", url);
+    loop {
+        //check if DNS resolution works
+        if dns
+            .get_host_by_name("discord.com", AddrType::IPv4)
+            .await
+            .is_ok()
+        {
+            break;
+        }
+        Timer::after(Duration::from_secs(1)).await;
+    }
 
-    let mut content: String<2000> = String::new();
-    content.push_str("{\"content\": \"Hello World!\"}").unwrap();
-    debug!("Content: {}", content);
-    let mut req_rx_buf = [0; 4096];
-    let headers = [
-        ("Authorization", concat!("Bot ", env!("DISCORD_BOT_TOKEN"))),
-        (
-            "User-Agent",
-            concat!(
-                "DiscordBot (",
-                env!("CARGO_PKG_HOMEPAGE"),
-                ", ",
-                env!("CARGO_PKG_VERSION"),
-                ")"
-            ),
-        ),
-    ]
-    .as_slice();
-    debug!("Headers: {:?}", headers);
+    let client = discord::notify_start(&mut client).await;
+
+    discord::commands::register_commands(client).await;
 
     loop {
-        match client.request(Method::POST, url).await {
-            Err(e) => {
-                error!("Can't create POST request: {:?}", e);
-            }
-            Ok(req) => {
-                if let Err(e) = req
-                    .body(content.as_bytes())
-                    .content_type(reqwless::headers::ContentType::ApplicationJson)
-                    .headers(headers)
-                    .send(&mut req_rx_buf)
-                    .await
-                {
-                    error!("HTTP POST Error: {:?}", e);
-                }
-            }
-        }
-        Timer::after(Duration::from_secs(10)).await;
+        Timer::after(Duration::from_secs(1)).await;
     }
 }
 
